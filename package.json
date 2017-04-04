@@ -2,6 +2,9 @@
   "name": "slack-emoji-bomber",
   "version": "1.0.0",
   "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "repository": "https://github.com/hakatashi/slack-emoji-bomber.git",
   "author": "Koki Takahashi <hakatasiloving@gmail.com>",
   "license": "MIT",
