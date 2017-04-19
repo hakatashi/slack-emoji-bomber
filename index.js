@@ -26,6 +26,11 @@ app.use(async (req, res) => {
 		return res.end('400 Bad Request');
 	}
 
+	if (!req.body.channel_id.startsWith('C')) {
+		res.writeHead(400, {'Content-Type': 'text/plain'});
+		return res.end('400 Bad Request');
+	}
+
 	const emojiList = await slack.emoji.list();
 	const customEmojis = Object.keys(emojiList.emoji);
 
