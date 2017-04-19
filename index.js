@@ -48,6 +48,9 @@ app.use(async (req, res) => {
 		return res.end('500 Internal Server Error');
 	}
 
+	res.writeHead(200, {'Content-Type': 'text/plain'});
+	res.end('boom!');
+
 	const {messages: [latestMessage]} = latestMessageResponse;
 
 	while (successes < 20 && fails < 5) {
@@ -64,8 +67,6 @@ app.use(async (req, res) => {
 			fails++;
 		}
 	}
-
-	res.end('hoa');
 });
 
 http.createServer(app).listen(process.env.PORT || 4545);
