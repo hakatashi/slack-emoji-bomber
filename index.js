@@ -23,12 +23,12 @@ app.use(async (req, res) => {
 
 	if (req.body.token !== process.env.SLASH_COMMAND_TOKEN || req.body.team_id !== process.env.TEAM_ID) {
 		res.writeHead(400, {'Content-Type': 'text/plain'});
-		return res.end('400 Bad Request');
+		return res.end('400 Bad Request\nInvalid token.');
 	}
 
 	if (!req.body.channel_id.startsWith('C')) {
 		res.writeHead(400, {'Content-Type': 'text/plain'});
-		return res.end('400 Bad Request');
+		return res.end('400 Bad Request\nYou cannot bomb private messages.');
 	}
 
 	const emojiList = await slack.emoji.list();
@@ -49,7 +49,7 @@ app.use(async (req, res) => {
 	}
 
 	res.writeHead(200, {'Content-Type': 'text/plain'});
-	res.end('boom!');
+	res.end('BOOM!!');
 
 	const {messages: [latestMessage]} = latestMessageResponse;
 
