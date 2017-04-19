@@ -26,6 +26,25 @@ app.use(async (req, res) => {
 		return res.end('400 Bad Request\nInvalid token.');
 	}
 
+	const args = req.body.text.trim().split(/\s+/);
+
+	const {channel_id, timestamp} = (() => {
+		const match = (args[0] || '').match(/^https:\/\/.+\/archives\/(.+?)\/p(\d+)$/);
+
+		if (match) {
+			const [_, channel_id, timestamp] = match;
+			return {
+				channel_id,
+				timestamp: `${timestamp.slice(0, -6)}.${timestamp.slice(-6)}`,
+			};
+		}
+
+		return {
+			channel_id: req.body.channel_id,
+			timestamp: null,
+		}
+	})();
+
 	if (!req.body.channel_id.startsWith('C')) {
 		res.writeHead(400, {'Content-Type': 'text/plain'});
 		return res.end('400 Bad Request\nYou cannot bomb private messages.');
@@ -36,30 +55,35 @@ app.use(async (req, res) => {
 
 	const emojis = [...defaultEmojis, ...customEmojis];
 
-	let successes = 0, fails = 0;
+	let latestMessage = null;
 
-	const latestMessageResponse = await slack.channels.history(req.body.channel_id, {
-		inclusive: true,
-		count: 1,
-	});
+	if (timestamp !== null) {
+		const latestMessageResponse = await slack.channels.history(req.body.channel_id, {
+			inclusive: true,
+			count: 1,
+		});
 
-	if (!latestMessageResponse.ok) {
-		res.writeHead(500, {'Content-Type': 'text/plain'});
-		return res.end('500 Internal Server Error');
+		if (!latestMessageResponse.ok) {
+			res.writeHead(500, {'Content-Type': 'text/plain'});
+			return res.end('500 Internal Server Error');
+		}
+
+		latestMessage = latestMessageResponse.messages[0];
 	}
 
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 	res.end('BOOM!!');
+	console.log(channel_id, timestamp, latestMessage);
 
-	const {messages: [latestMessage]} = latestMessageResponse;
+	let successes = 0, fails = 0;
 
 	while (successes < 20 && fails < 5) {
 		const emoji = emojis[Math.floor(Math.random() * emojis.length)];
 
 		try {
 			await slack.reactions.add(emoji, {
-				channel: req.body.channel_id,
-				timestamp: latestMessage.ts,
+				channel: channel_id,
+				timestamp: timestamp ? timestamp : latestMessage.ts,
 			});
 			successes++;
 		} catch (error) {
