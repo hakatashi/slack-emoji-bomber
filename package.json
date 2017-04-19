@@ -5,6 +5,9 @@
   "scripts": {
     "start": "node index.js"
   },
+  "engines": {
+    "node": "~7.7.2"
+  },
   "repository": "https://github.com/hakatashi/slack-emoji-bomber.git",
   "author": "Koki Takahashi <hakatasiloving@gmail.com>",
   "license": "MIT",
