@@ -33,30 +33,10 @@ app.use(async (req, res) => {
 
 	let successes = 0, fails = 0;
 
-	const latestMessageResponse = await (() => {
-		if (req.body.channel_id.startsWith('C')) {
-			return slack.channels.history(req.body.channel_id, {
-				inclusive: true,
-				count: 1,
-			});
-		}
-
-		if (req.body.channel_id.startsWith('D')) {
-			return slack.im.history(req.body.channel_id, {
-				inclusive: true,
-				count: 1,
-			});
-		}
-
-		if (req.body.channel_id.startsWith('G')) {
-			return slack.groups.history(req.body.channel_id, {
-				inclusive: true,
-				count: 1,
-			});
-		}
-
-		return Promise.resolve({ok: false});
-	})();
+	const latestMessageResponse = await slack.channels.history(req.body.channel_id, {
+		inclusive: true,
+		count: 1,
+	});
 
 	if (!latestMessageResponse.ok) {
 		res.writeHead(500, {'Content-Type': 'text/plain'});
