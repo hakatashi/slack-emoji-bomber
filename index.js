@@ -73,7 +73,6 @@ app.use(async (req, res) => {
 
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 	res.end('BOOM!!');
-	console.log(channel_id, timestamp, latestMessage);
 
 	let successes = 0, fails = 0;
 
