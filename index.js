@@ -57,7 +57,7 @@ app.use(async (req, res) => {
 
 	let latestMessage = null;
 
-	if (timestamp !== null) {
+	if (timestamp === null) {
 		const latestMessageResponse = await slack.channels.history(req.body.channel_id, {
 			inclusive: true,
 			count: 1,
