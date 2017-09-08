@@ -70,11 +70,16 @@ app.use(async (req, res) => {
 		})();
 
 		if (message !== null) {
-			return uniq(message.match(/:.+?:/g).map(s => s.slice(1, -1)));
+			return uniq((message.match(/:.+?:/g) || []).map(s => s.slice(1, -1)));
 		}
 
 		return sampleSize(allEmojis, 25);
 	})();
+
+	if (emojis.length === 0) {
+		res.writeHead(400, {'Content-Type': 'text/plain'});
+		return res.end('400 Bad Request\nEmoji not found.');
+	}
 
 	let latestMessage = null;
 
