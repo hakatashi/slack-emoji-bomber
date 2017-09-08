@@ -3,6 +3,7 @@ require('dotenv').config();
 const http = require('http');
 const connect = require('connect');
 const bodyParser = require('body-parser');
+const {sampleSize, uniq} = require('lodash');
 const slackSDK = require('@slack/client');
 
 const defaultEmojis = require('./default-emojis.js');
@@ -19,7 +20,7 @@ app.use(async (req, res) => {
 		return res.end('404 Not Found');
 	}
 
-	console.log(req.body);
+	console.log(new Date(), req.body);
 
 	if (req.body.token !== process.env.SLASH_COMMAND_TOKEN || req.body.team_id !== process.env.TEAM_ID) {
 		res.writeHead(400, {'Content-Type': 'text/plain'});
@@ -53,7 +54,27 @@ app.use(async (req, res) => {
 	const emojiList = await slack.emoji.list();
 	const customEmojis = Object.keys(emojiList.emoji);
 
-	const emojis = [...defaultEmojis, ...customEmojis];
+	const allEmojis = [...defaultEmojis, ...customEmojis];
+
+	const emojis = (() => {
+		const message = (() => {
+			if (args[1]) {
+				return args[1];
+			}
+
+			if (args[0] && timestamp === null) {
+				return args[0];
+			}
+
+			return null;
+		})();
+
+		if (message && message.startsWith(':')) {
+			return uniq(message.match(/:.+?:/g).map(s => s.slice(1, -1)));
+		}
+
+		return sampleSize(allEmojis, 25);
+	})();
 
 	let latestMessage = null;
 
@@ -74,10 +95,10 @@ app.use(async (req, res) => {
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 	res.end('BOOM!!');
 
-	let successes = 0, fails = 0;
+	let successes = 0, fails = 0, i = 0;
 
-	while (successes < 20 && fails < 5) {
-		const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+	for (let i = 0; successes < 20 && fails < 5 && i < emojis.length; i++) {
+		const emoji = emojis[i];
 
 		try {
 			await slack.reactions.add(emoji, {
