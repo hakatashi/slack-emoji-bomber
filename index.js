@@ -69,7 +69,7 @@ app.use(async (req, res) => {
 			return null;
 		})();
 
-		if (message && message.startsWith(':')) {
+		if (message !== null) {
 			return uniq(message.match(/:.+?:/g).map(s => s.slice(1, -1)));
 		}
 
